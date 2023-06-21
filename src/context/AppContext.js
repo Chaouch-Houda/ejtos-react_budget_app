@@ -4,7 +4,7 @@ import React, { createContext, useReducer } from 'react';
 export const AppReducer = (state, action) => {
     let budget = 0;
     switch (action.type) {
-        case 'ADD_EXPENSE':
+        case 'ADD_EXPENSE':   //Cette action est déclenchée lorsqu'une nouvelle dépense doit être ajoutée. 
             let total_budget = 0;
             total_budget = state.expenses.reduce(
                 (previousExp, currentExp) => {
@@ -21,6 +21,7 @@ export const AppReducer = (state, action) => {
                     }
                     return currentExp
                 });
+                //Cela permet de renvoyer une nouvelle référence d'état avec les dépenses mises à jour.
                 return {
                     ...state,
                 };
@@ -28,35 +29,35 @@ export const AppReducer = (state, action) => {
                 alert("Cannot increase the allocation! Out of funds");
                 return {
                     ...state
-                }
-            }
-            case 'RED_EXPENSE':
-                const red_expenses = state.expenses.map((currentExp)=> {
-                    if (currentExp.name === action.payload.name && currentExp.cost - action.payload.cost >= 0) {
-                        currentExp.cost =  currentExp.cost - action.payload.cost;
-                        budget = state.budget + action.payload.cost
-                    }
-                    return currentExp
-                })
-                action.type = "DONE";
-                return {
-                    ...state,
-                    expenses: [...red_expenses],
                 };
-            case 'DELETE_EXPENSE':
-            action.type = "DONE";
-            state.expenses.map((currentExp)=> {
-                if (currentExp.name === action.payload) {
-                    budget = state.budget + currentExp.cost
-                    currentExp.cost =  0;
+            }
+        case 'RED_EXPENSE':  //Cette action est déclenchée lorsqu'il faut réduire le coût d'une dépense existante. 
+            const red_expenses = state.expenses.map((currentExp)=> {
+                if (currentExp.name === action.payload.name && currentExp.cost - action.payload.cost >= 0) {
+                    currentExp.cost =  currentExp.cost - action.payload.cost;
+                    budget = state.budget + action.payload.cost
                 }
                 return currentExp
             })
             action.type = "DONE";
             return {
                 ...state,
-                budget
+                expenses: [...red_expenses],
             };
+        case 'DELETE_EXPENSE':
+        action.type = "DONE";
+        state.expenses.map((currentExp)=> {
+            if (currentExp.name === action.payload) {
+                budget = state.budget + currentExp.cost
+                currentExp.cost =  0;
+            }
+            return currentExp
+        })
+        action.type = "DONE";
+        return {
+            ...state,
+            budget
+        };
         case 'SET_BUDGET':
             action.type = "DONE";
             state.budget = action.payload;
@@ -64,7 +65,7 @@ export const AppReducer = (state, action) => {
             return {
                 ...state,
             };
-        case 'CHG_CURRENCY':
+        case 'CHG_CURRENCY': //Cette action est déclenchée lorsqu'il faut changer la devise utilisée.
             action.type = "DONE";
             state.currency = action.payload;
             return {
@@ -90,14 +91,15 @@ const initialState = {
 };
 
 // 2. Creates the context this is the thing our components import and use to get the state
-export const AppContext = createContext();
+export const AppContext = createContext(); //est utilisée pour créer un objet de contexte qui permet de partager des données entre les composants d'une application React, sans avoir à les transmettre explicitement via des props à travers chaque niveau de composant.
 
 // 3. Provider component - wraps the components we want to give access to the state
 // Accepts the children, which are the nested(wrapped) components
 export const AppProvider = (props) => {
     // 4. Sets up the app state. takes a reducer, and an initial state
-    const [state, dispatch] = useReducer(AppReducer, initialState);
-    let remaining = 0;
+    const [state, dispatch] = useReducer(AppReducer, initialState); //const [state, dispatch] = useReducer(reducer, initialState);:La fonction useReducer() est une fonction de l'API de hooks de React. Elle permet de gérer l'état d'un composant à l'aide du concept de réducteur (reducer), inspiré par Redux.
+
+    let remaining = 0; //متبقي
 
     if (state.expenses) {
             const totalExpenses = state.expenses.reduce((total, item) => {
